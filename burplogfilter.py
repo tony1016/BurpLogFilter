@@ -84,7 +84,7 @@ def isBlockUseful(block,host,isFilterStaticResource=True):
 				params=line.split(" ")[1].split("?")[1]
 			
 
-			pattern=generatePattern(url,params)
+			pattern=generatePattern(line.split(" ")[0],url,params)
 			if pattern in url_param_patterns:
 				if DEBUG:
 					print("[DEBUG] Pattern %s exists"%pattern)
@@ -96,8 +96,9 @@ def isBlockUseful(block,host,isFilterStaticResource=True):
 		
 	return True
 
-def generatePattern(url,params):
+def generatePattern(method,url,params):
 	pattern=[]
+	pattern.append(method)
 	pattern.append(url)
 	paramKeys=[]
 	for item in params.split("&"):
