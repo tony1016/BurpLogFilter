@@ -24,15 +24,14 @@ def main():
 
     for opt,arg in options:
         if opt == "-f":
-            filename=arg
+            filename=arg.strip("'")
         if opt == "--host":
-            host=arg
+            host=arg.strip("'")
         if opt == "-h":
             showHelp()
             return
 
     blocks=scrapBlocks(filename)
-
     filteredBlocks=[]
     for block in blocks:
         if isBlockUseful(block,host) :
@@ -48,8 +47,8 @@ def scrapBlocks(filename):
         print("Try to anayze file %s"%filename)
 
     blocks=None
-    with open(filename) as file:
-        content=file.read()
+    with open(filename, 'rb') as f:
+        content=f.read()
         blocks = re.findall(r'======================================================'
             r'.*?======================================================'
             r'.*?======================================================', content, re.S)
@@ -73,11 +72,11 @@ def isBlockUseful(block,host,isFilterStaticResource=True):
     # 过滤Host
     if host:
         for line in block.split("\n"):
-            if re.match("^Host:",line):
-                if host not in line[6:]:
-                    if DEBUG:
-                        print("[DEBUG] Filter this host %s"%line[6:])
-                    return False
+            m = re.match(r"^Host:(.*)", line)
+            if m and host not in m.group(1).strip():
+                if DEBUG:
+                    print("[DEBUG] Filter this host %s" % m.group(1).strip())
+                return False
 
     # 过滤URL模式
     for line in block.split("\n"):
@@ -128,7 +127,7 @@ def showHelp():
     print("  --host keyword, --host=keyword      Host name filter")
     print("  -v                                  Show debug message")
     print("\nExamples:")
-    print("  python3 burplogfilter.py -f /tmp/burp.log --host='google.com'")
+    print("  python3 burplogfilter.py -f /tmp/burp.log --host=google.com")
     print("\n[!] to see help message of options run with '-h'")
 
 if __name__ == '__main__':
